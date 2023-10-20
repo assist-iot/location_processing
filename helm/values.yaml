@@ -1,0 +1,207 @@
+# Default values for enabler.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# String to partially override enabler.fullname template (will maintain the release name)
+nameOverride: ""
+# String to fully override enabler.fullname template
+fullnameOverride: ""
+# Deploy all the components in the same node
+enablerNodeSelector: {}
+
+# Component app values
+app:
+  tier: external
+  image:
+    repository: docker.io/assistiot/location_processing
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: latest
+
+  replicaCount: 1
+  service:
+    type: NodePort
+    nodePort: ""
+    port: 80
+    targetPort: 8080
+    containerPort: 8080
+    protocol: TCP
+
+  # The specification of the resources is needed for the proper functioning
+  # of the Smart Orchestrator enabler (requests)
+  # and of the Resource provisioning enabler (limits)
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 1
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  podSecurityContext: {}
+  # fsGroup: 2000
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+  # Include here the environment variables to be used in the component's manifest (container section).
+  # Here and in the manifest is included an example.
+  envVars:
+    HTTP_PORT: 8080
+
+    DB_ADMIN_PORT: 5432
+    DB_ADMIN_NAME: postgres
+    DB_ADMIN_USER: postgres
+    DB_ADMIN_PASSWORD: postgres
+
+    DB_QUERIES_PORT: 5432
+    DB_QUERIES_NAME: queries
+    DB_QUERIES_USER: postgres
+    DB_QUERIES_PASSWORD: postgres
+
+    DB_GEOLOCATION_PORT: 5432
+    DB_GEOLOCATION_NAME: geolocation
+    DB_GEOLOCATION_USER: postgres
+    DB_GEOLOCATION_PASSWORD: postgres
+
+  imagePullSecrets: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Component db values
+db:
+  tier: internal
+  image:
+    repository: docker.io/postgis/postgis
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "15-3.3"
+
+  replicaCount: 1
+  service:
+    type: NodePort
+    nodePort: ""
+    port: 5432
+    targetPort: 5432
+    containerPort: 5432
+    protocol: TCP
+
+  # The specification of the resources is needed for the proper functioning
+  # of the Smart Orchestrator enabler (requests)
+  # and of the Resource provisioning enabler (limits)
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 1
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  podSecurityContext: {}
+  # fsGroup: 2000
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+  # Include here the environment variables to be used in the component's manifest (container section).
+  # Here and in the manifest is included an example.
+  envVars:
+    POSTGRES_DB: postgres
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: postgres
+
+  persistence:
+    mountPath: /var/lib/postgresql
+    accessModes:
+      - ReadWriteOnce
+    size: 128Mi
+
+  imagePullSecrets: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Component pgadmin values
+pgadmin:
+  tier: internal
+  image:
+    repository: dpage/pgadmin4
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "6.12"
+
+  replicaCount: 1
+  service:
+    type: NodePort
+    nodePort: ""
+    port: 5433
+    targetPort: 80
+    containerPort: 5433
+    protocol: TCP
+
+  # The specification of the resources is needed for the proper functioning
+  # of the Smart Orchestrator enabler (requests)
+  # and of the Resource provisioning enabler (limits)
+  resources: {}
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 1
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  podSecurityContext: {}
+  # fsGroup: 2000
+
+  securityContext: {}
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+  # Include here the environment variables to be used in the component's manifest (container section).
+  # Here and in the manifest is included an example.
+  envVars:
+    GUNICORN_ACCESS_LOGFILE: /dev/null
+    PGADMIN_DEFAULT_EMAIL: admin@admin.org
+    PGADMIN_DEFAULT_PASSWORD: admin
+    PGADMIN_CONFIG_SERVER_MODE: "False"
+
+  imagePullSecrets: []
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}

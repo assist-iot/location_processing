@@ -1,0 +1,17 @@
+.bloop
+.bsp
+.idea
+.metals
+.vscode
+docker/Dockerfile*
+docker/docker-compose.*
+project/.bloop
+project/project
+project/target
+project/metals.sbt
+target
+.dockerignore
+.gitignore
+.gitlab-ci.yml
+README.md
+*.semanticdb

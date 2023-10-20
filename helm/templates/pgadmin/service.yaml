@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "pgadmin.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "pgadmin.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.pgadmin.service.type }}
+  ports:
+    - port: {{ .Values.pgadmin.service.port }}
+      targetPort: {{ .Values.pgadmin.service.targetPort }}
+      protocol: {{ .Values.pgadmin.service.protocol }}
+      {{- if and (or (eq .Values.pgadmin.service.type "NodePort") (eq .Values.pgadmin.service.type "LoadBalancer")) (not (empty .Values.pgadmin.service.nodePort)) }}
+      nodePort: {{ .Values.pgadmin.service.nodePort }}
+      {{ end }}
+  selector:
+    {{- include "pgadmin.selectorLabels" . | nindent 4 }}

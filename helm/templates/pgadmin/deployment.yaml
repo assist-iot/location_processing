@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "pgadmin.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "pgadmin.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.pgadmin.autoscaling.enabled }}
+  replicas: {{ .Values.pgadmin.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "pgadmin.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "pgadmin.labels" . | nindent 8 }}
+    spec:
+      {{- with .Values.pgadmin.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.enablerNodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if not .Values.enablerNodeSelector }}
+        {{- with .Values.pgadmin.nodeSelector }}
+      nodeSelector:
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.pgadmin.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.pgadmin.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.pgadmin.podSecurityContext | nindent 8 }}
+      containers:
+        - name: pgadmin
+          securityContext:
+            {{- toYaml .Values.pgadmin.securityContext | nindent 12 }}
+          image: "{{ .Values.pgadmin.image.repository }}:{{ .Values.pgadmin.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.pgadmin.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.pgadmin.service.containerPort }}
+              protocol: {{ .Values.pgadmin.service.protocol }}
+          resources:
+            {{- toYaml .Values.pgadmin.resources | nindent 12 }}
+          {{- with .Values.pgadmin.envVars }}
+          env:
+            - name: GUNICORN_ACCESS_LOGFILE
+              value: {{ .GUNICORN_ACCESS_LOGFILE | quote }}
+            - name: PGADMIN_DEFAULT_EMAIL
+              value: {{ .PGADMIN_DEFAULT_EMAIL | quote }}
+            - name: PGADMIN_DEFAULT_PASSWORD
+              value: {{ .PGADMIN_DEFAULT_PASSWORD | quote }}
+            - name: PGADMIN_CONFIG_SERVER_MODE
+              value: {{ .PGADMIN_CONFIG_SERVER_MODE | quote }}
+          {{- end }}

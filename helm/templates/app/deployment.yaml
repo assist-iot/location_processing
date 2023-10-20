@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "app.fullname" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.app.autoscaling.enabled }}
+  replicas: {{ .Values.app.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "app.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "app.labels" . | nindent 8 }}
+    spec:
+      {{- with .Values.app.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.enablerNodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if not .Values.enablerNodeSelector }}
+        {{- with .Values.app.nodeSelector }}
+      nodeSelector:
+          {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.app.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.app.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.app.podSecurityContext | nindent 8 }}
+      containers:
+        - name: app
+          securityContext:
+            {{- toYaml .Values.app.securityContext | nindent 12 }}
+          image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.app.service.containerPort }}
+              protocol: {{ .Values.app.service.protocol }}
+          resources:
+            {{- toYaml .Values.app.resources | nindent 12 }}
+          env:
+            - name: HTTP_PORT
+              value: {{ .Values.app.envVars.HTTP_PORT | quote }}
+
+            - name: DB_ADMIN_SERVER_NAME
+              value: {{ include "db.kubernetesServerName" . | quote }}
+            - name: DB_ADMIN_PORT
+              value: {{ .Values.app.envVars.DB_ADMIN_PORT | quote }}
+            - name: DB_ADMIN_NAME
+              value: {{ .Values.app.envVars.DB_ADMIN_NAME | quote }}
+            - name: DB_ADMIN_USER
+              value: {{ .Values.app.envVars.DB_ADMIN_USER | quote }}
+            - name: DB_ADMIN_PASSWORD
+              value: {{ .Values.app.envVars.DB_ADMIN_PASSWORD | quote }}
+
+            - name: DB_QUERIES_SERVER_NAME
+              value: {{ include "db.kubernetesServerName" . | quote }}
+            - name: DB_QUERIES_PORT
+              value: {{ .Values.app.envVars.DB_QUERIES_PORT | quote }}
+            - name: DB_QUERIES_NAME
+              value: {{ .Values.app.envVars.DB_QUERIES_NAME | quote }}
+            - name: DB_QUERIES_USER
+              value: {{ .Values.app.envVars.DB_QUERIES_USER | quote }}
+            - name: DB_QUERIES_PASSWORD
+              value: {{ .Values.app.envVars.DB_QUERIES_PASSWORD | quote }}
+
+            - name: DB_GEOLOCATION_SERVER_NAME
+              value: {{ include "db.kubernetesServerName" . | quote }}
+            - name: DB_GEOLOCATION_PORT
+              value: {{ .Values.app.envVars.DB_GEOLOCATION_PORT | quote }}
+            - name: DB_GEOLOCATION_NAME
+              value: {{ .Values.app.envVars.DB_GEOLOCATION_NAME | quote }}
+            - name: DB_GEOLOCATION_USER
+              value: {{ .Values.app.envVars.DB_GEOLOCATION_USER | quote }}
+            - name: DB_GEOLOCATION_PASSWORD
+              value: {{ .Values.app.envVars.DB_GEOLOCATION_PASSWORD | quote }}

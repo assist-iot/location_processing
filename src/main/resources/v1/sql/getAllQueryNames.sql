@@ -1,0 +1,4 @@
+select
+  name
+from
+  queries;

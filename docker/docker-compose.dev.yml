@@ -1,0 +1,106 @@
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile.dev
+    container_name: lp-app-dev
+    environment:
+      - HTTP_PORT=8080
+      - DB_ADMIN_SERVER_NAME=postgres
+      - DB_ADMIN_PORT=5432
+      - DB_ADMIN_NAME=postgres
+      - DB_ADMIN_USER=postgres
+      - DB_ADMIN_PASSWORD=postgres
+      - DB_QUERIES_SERVER_NAME=postgres
+      - DB_QUERIES_PORT=5432
+      - DB_QUERIES_NAME=queries
+      - DB_QUERIES_USER=postgres
+      - DB_QUERIES_PASSWORD=postgres
+      - DB_GEOLOCATION_SERVER_NAME=postgres
+      - DB_GEOLOCATION_PORT=5432
+      - DB_GEOLOCATION_NAME=geolocation
+      - DB_GEOLOCATION_USER=postgres
+      - DB_GEOLOCATION_PASSWORD=postgres
+    networks:
+      - app-net
+    ports:
+      - "8080:8080"
+    volumes:
+      - app-ivy2-data:/root/.ivy2
+      - app-sbt-data:/root/.sbt
+      - ../src:/app/src
+
+  mosquitto:
+    build: ./mosquitto
+    container_name: lp-mosquitto-dev
+    networks:
+      - app-net
+      - mosquitto-net
+    ports:
+      - "1883:1883"
+
+  mqtt-explorer:
+    container_name: lp-mqtt-explorer-dev
+    environment:
+      - HTTP_PORT=4000
+    image: smeagolworms4/mqtt-explorer:browser-1.0.1
+    networks:
+      - mosquitto-net
+    ports:
+      - "4000:4000"
+    volumes:
+      - mqtt-explorer-data:/mqtt-explorer/config
+
+  postgres:
+    container_name: lp-postgres-dev
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    image: postgis/postgis:15-3.3
+    networks:
+      - app-net
+      - db-net
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    container_name: lp-pgadmin-dev
+    environment:
+      - GUNICORN_ACCESS_LOGFILE=/dev/null
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.org
+      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    image: dpage/pgadmin4:6.12
+    logging:
+      driver: none
+    networks:
+      - db-net
+    ports:
+      - "5433:80"
+    volumes:
+      - pgadmin-data:/pgadmin4
+
+  qgis:
+    container_name: lp-qgis-dev
+    environment:
+      - DISPLAY=unix$DISPLAY
+    image: kartoza/qgis-desktop:3.0.3
+    networks:
+      - db-net
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ${HOME}:/home/${USER}
+
+networks:
+  app-net:
+  db-net:
+  mosquitto-net:
+
+volumes:
+  app-ivy2-data:
+  app-sbt-data:
+  mqtt-explorer-data:
+  pgadmin-data:

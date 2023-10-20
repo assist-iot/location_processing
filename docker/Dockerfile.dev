@@ -1,0 +1,8 @@
+FROM sbtscala/scala-sbt:eclipse-temurin-17.0.4_1.7.1_3.2.0
+WORKDIR /app
+COPY ./docker/entrypoint.dev ./entrypoint.sh
+COPY ./project/plugins.sbt ./project/plugins.sbt
+COPY ./configs ./configs
+COPY ./build.sbt ./build.sbt
+COPY ./src ./src
+ENTRYPOINT [ "./entrypoint.sh" ]

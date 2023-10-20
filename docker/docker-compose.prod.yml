@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile.prod
+    container_name: lp-app-prod
+    environment:
+      - HTTP_PORT=8080
+      - DB_ADMIN_SERVER_NAME=postgres
+      - DB_ADMIN_PORT=5432
+      - DB_ADMIN_NAME=postgres
+      - DB_ADMIN_USER=postgres
+      - DB_ADMIN_PASSWORD=postgres
+      - DB_QUERIES_SERVER_NAME=postgres
+      - DB_QUERIES_PORT=5432
+      - DB_QUERIES_NAME=queries
+      - DB_QUERIES_USER=postgres
+      - DB_QUERIES_PASSWORD=postgres
+      - DB_GEOLOCATION_SERVER_NAME=postgres
+      - DB_GEOLOCATION_PORT=5432
+      - DB_GEOLOCATION_NAME=geolocation
+      - DB_GEOLOCATION_USER=postgres
+      - DB_GEOLOCATION_PASSWORD=postgres
+    ports:
+      - "8080:8080"
+
+  postgres:
+    container_name: lp-postgres-prod
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    image: postgis/postgis:15-3.3
+    volumes:
+      - postgres-data:/var/lib/postgresql
+
+volumes:
+  postgres-data:
