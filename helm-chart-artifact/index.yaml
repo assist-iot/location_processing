@@ -1,3 +1,14 @@
 apiVersion: v1
-entries: {}
-generated: "2023-11-28T11:29:47.890671355+01:00"
+entries:
+  locationprocessing:
+  - apiVersion: v2
+    appVersion: 1.0.0
+    created: "2024-02-11T17:19:05.009166216+01:00"
+    description: Location Processing enabler
+    digest: e145c0af048e7d4b43dbd20b2cd68dfbbea3a8b262681dee3e627bb77142f4ad
+    name: locationprocessing
+    type: application
+    urls:
+    - locationprocessing-1.0.0.tgz
+    version: 1.0.0
+generated: "2024-02-11T17:19:05.008624316+01:00"
